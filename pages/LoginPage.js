@@ -7,6 +7,8 @@ class LoginPage extends BasePage {
   constructor(page) {
     super(page); // Llamar al constructor de la clase padre
     
+    // URL base de la aplicación Swag Labs
+    this.baseUrl = 'https://www.saucedemo.com/';
     // Selector del campo de usuario
     this.usernameInput = '#user-name';
     // Selector del campo de contraseña
@@ -17,9 +19,9 @@ class LoginPage extends BasePage {
     this.inventoryContainer = '.inventory_container';
   }
 
-  // Navegar a la página de login de Swag Labs
+  // Navegar a la página de login usando el método heredado de BasePage
   async navigate() {
-    await this.page.goto('https://www.saucedemo.com/');
+    await super.navigate(this.baseUrl);
   }
 
   // Ingresar el nombre de usuario en el campo correspondiente

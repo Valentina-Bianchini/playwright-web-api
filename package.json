@@ -4,8 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "cucumber-js features/**/*.feature --require features/support/**/*.js --require step-definitions/**/*.js --format progress-bar --format html:reports/cucumber-report.html",
-    "test:tags": "cucumber-js features/**/*.feature --require features/support/**/*.js --require step-definitions/**/*.js --tags"
+    "test:report": "playwright test && npx playwright show-report"
   },
   "keywords": [],
   "author": "",
