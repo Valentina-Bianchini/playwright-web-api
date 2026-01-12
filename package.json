@@ -1,0 +1,19 @@
+{
+  "name": "playwright-e2e",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "cucumber-js features/**/*.feature --require features/support/**/*.js --require step-definitions/**/*.js --format progress-bar --format html:reports/cucumber-report.html",
+    "test:tags": "cucumber-js features/**/*.feature --require features/support/**/*.js --require step-definitions/**/*.js --tags"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@cucumber/cucumber": "^12.5.0",
+    "@playwright/test": "^1.57.0",
+    "@types/node": "^25.0.6"
+  }
+}
