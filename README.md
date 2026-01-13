@@ -20,7 +20,13 @@ playwright-e2e/
 │   │   └── LoginPage.js       # Page Object específico para la página de login
 │   │
 │   ├── tests/                 # Tests de Playwright (.spec.js)
-│   │   └── login.spec.js      # Tests de login con 3 escenarios diferentes
+│   │   └── login.spec.js      # Test de login con Data-Driven Testing
+│   │
+│   ├── csv/                   # Archivos CSV con datos de prueba
+│   │   └── credentials.csv    # Usuarios y contraseñas para Data-Driven Testing
+│   │
+│   ├── utils/                 # Utilidades y helpers
+│   │   └── csvHelper.js       # Helper para leer archivos CSV
 │   │
 │   └── README.md              # Documentación de tests frontend
 │
@@ -47,6 +53,16 @@ Esto permite:
 - ✅ Ejecutar todos los tests desde la raíz
 - ✅ Configuraciones específicas por tipo de test (navegadores vs API)
 - ✅ Mejor mantenibilidad y consistencia
+
+## 📊 Data-Driven Testing
+
+Los tests de frontend utilizan **Data-Driven Testing** con archivos CSV:
+- Un único test se ejecuta con múltiples conjuntos de datos
+- Usuarios y contraseñas almacenados en `frontend/csv/credentials.csv`
+- Fácil agregar nuevos casos: solo edita el CSV
+- Separación clara entre código y datos de prueba
+
+**Ejemplo:** 3 usuarios en CSV = 3 tests × 3 navegadores = **9 tests ejecutados automáticamente**
 
 ## 🔧 Tecnologías Utilizadas
 
@@ -156,76 +172,79 @@ npx playwright show-report
 ```
 
 El reporte incluye:
-- Videos de la ejecución
-- Screenshots de cada paso
-- Trazas de la ejecución
-- Detalles de errores
+- ✅ Resumen de tests ejecutados (Frontend + API)
+- ✅ Videos de la ejecución (tests E2E)
+- ✅ Screenshots de cada paso
+- ✅ Trazas completas de la ejecución
+- ✅ Detalles de errores y stack traces
+- ✅ Tiempo de ejecución por test
 
-### Reporte HTML de Cucumber
+## 📝 Estructura de Tests
 
-Se genera automáticamente en `reports/cucumber-report.html` después de ejecutar:
-
-```bash
-npm run test:cucumber
-```
-
-## 📝 Estructura de un Test
-
-### Usando Playwright Test
+### Tests E2E de Frontend (Data-Driven)
 
 ```javascript
-// tests/login.spec.js
+// frontend/tests/login.spec.js
 const { test, expect } = require('@playwright/test');
 const LoginPage = require('../pages/LoginPage');
+const { readCSV } = require('../utils/csvHelper');
+const path = require('path');
 
-test.describe('Login en Swag Labs', () => {
-  let loginPage;
+// Leer credenciales desde CSV
+const csvPath = path.join(__dirname, '../csv/credentials.csv');
+const credentials = readCSV(csvPath);
 
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    await loginPage.navigate();
-  });
-
-  test('Login correcto con usuario estándar', async () => {
-    await loginPage.enterUsername('standard_user');
-    await loginPage.enterPassword('secret_sauce');
-    await loginPage.clickLoginButton();
-    
-    const isLoaded = await loginPage.verifyProductsPageLoaded();
-    expect(isLoaded).toBeTruthy();
-  });
+// El test se ejecuta automáticamente para cada usuario del CSV
+test.describe('Login en Swag Labs - Data-Driven Testing', () => {
+  for (const credential of credentials) {
+    test(`Login correcto con ${credential.description}`, async ({ page }) => {
+      const loginPage = new LoginPage(page);
+      await loginPage.navigate();
+      await loginPage.enterUsername(credential.username);
+      await loginPage.enterPassword(credential.password);
+      await loginPage.clickLoginButton();
+      
+      const isLoaded = await loginPage.verifyProductsPageLoaded();
+      expect(isLoaded).toBeTruthy();
+    });
+  }
 });
 ```
 
-### Usando Cucumber/BDD
-
-**Feature file:**
-```gherkin
-# features/login.feature
-Feature: Login en Swag Labs
-  Scenario: Login correcto
-    Given que el usuario está en la página de inicio Swag Labs
-    When el usuario ingresa el nombre de usuario "standard_user"
-    And el usuario ingresa la contraseña "secret_sauce"
-    And el usuario hace clic en el botón de inicio de sesión
-    Then el usuario debería ser redirigido a la página de productos
+**Archivo CSV (`frontend/csv/credentials.csv`):**
+```csv
+username,password,description
+standard_user,secret_sauce,Usuario estándar
+problem_user,secret_sauce,Usuario con problemas
+performance_glitch_user,secret_sauce,Usuario con problemas de rendimiento
 ```
 
-**Step definitions:**
+### Tests de API REST
+
 ```javascript
-// step-definitions/loginSteps.js
-const { Given, When, Then } = require('@cucumber/cucumber');
-const LoginPage = require('../pages/LoginPage');
+// api/tests/objects.spec.js
+const { test, expect } = require('@playwright/test');
 
-let loginPage;
+const API_BASE_URL = 'https://api.restful-api.dev';
+const ENDPOINT = '/objects';
 
-Given('que el usuario está en la página de inicio Swag Labs', async function () {
-  loginPage = new LoginPage(this.page);
-  await loginPage.navigate();
-});
-
-When('el usuario ingresa el nombre de usuario {string}', async function (usuario) {
-  await loginPage.enterUsername(usuario);
+test.describe('API Tests - /objects endpoint', () => {
+  test('GET /objects/{id} - Debe retornar status 200', async ({ request }) => {
+    const response = await request.get(`${API_BASE_URL}${ENDPOINT}/7`);
+    expect(response.status()).toBe(200);
+  });
+  
+  test('POST /objects - Debe crear un nuevo objeto', async ({ request }) => {
+    const response = await request.post(`${API_BASE_URL}${ENDPOINT}`, {
+      data: {
+        name: "Apple MacBook Pro 16",
+        data: { year: 2019, price: 1849.99 }
+      }
+    });
+    expect(response.status()).toBe(200);
+    const body = await response.json();
+    expect(body.id).toBeDefined();
+  });
 });
 ```
 
@@ -264,22 +283,41 @@ class LoginPage extends BasePage {
 
 ## ✅ Configuración de Tests
 
-### Archivo playwright.config.js
+### Archivo playwright.config.js (Centralizado)
 
 ```javascript
 export default defineConfig({
-  testDir: './tests',           // Directorio con los tests
-  fullyParallel: false,         // Ejecutar tests secuencialmente
-  workers: 1,                   // 1 worker (un test a la vez)
-  reporter: 'html',            // Formato de reporte
-  use: {
-    trace: 'on',               // Grabar trazas de ejecución
-  },
+  fullyParallel: true,
+  reporter: 'html',
+  timeout: 30000,
+  
   projects: [
-    { name: 'chromium' },      // Probar en Chrome
-    { name: 'firefox' },       // Probar en Firefox
-    { name: 'webkit' },        // Probar en Safari
-  ]
+    // Tests E2E - Frontend
+    {
+      name: 'frontend-chromium',
+      testDir: './frontend/tests',
+      use: { ...devices['Desktop Chrome'], trace: 'on' },
+    },
+    {
+      name: 'frontend-firefox',
+      testDir: './frontend/tests',
+      use: { ...devices['Desktop Firefox'], trace: 'on' },
+    },
+    {
+      name: 'frontend-webkit',
+      testDir: './frontend/tests',
+      use: { ...devices['Desktop Safari'], trace: 'on' },
+    },
+    // Tests de API
+    {
+      name: 'api',
+      testDir: './api/tests',
+      use: {
+        baseURL: 'https://api.restful-api.dev',
+        extraHTTPHeaders: { 'Accept': 'application/json' },
+      },
+    },
+  ],
 });
 ```
 
@@ -395,4 +433,4 @@ Valentina Bianchini
 
 ---
 
-**Última actualización:** January 12, 2026
+**Última actualización:** January 13, 2026
