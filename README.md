@@ -1,49 +1,56 @@
-# Playwright Web Automation Testing
+# Playwright Testing - Frontend E2E & API
 
-Proyecto de automatización de pruebas E2E utilizando **Playwright** con arquitectura de **Page Object Model (POM)** y soporte para **Cucumber/BDD**.
+Proyecto de automatización de pruebas utilizando **Playwright** con arquitectura de **Page Object Model (POM)** para tests E2E y tests de API REST.
 
 ## 📋 Descripción
 
-Este proyecto contiene tests automatizados para la aplicación web [Swag Labs](https://www.saucedemo.com/), implementados con Playwright y la arquitectura de Page Object Model para mantener el código limpio, reutilizable y fácil de mantener.
+Este proyecto contiene:
+- **Tests E2E de Frontend**: Pruebas automatizadas para la aplicación web [Swag Labs](https://www.saucedemo.com/)
+- **Tests de API**: Pruebas de endpoints REST de [Restful API Dev](https://api.restful-api.dev)
+
+Implementados con Playwright usando una configuración centralizada y arquitectura de Page Object Model para mantener el código limpio, reutilizable y fácil de mantener.
 
 ## 🏗️ Estructura del Proyecto
 
 ```
 playwright-e2e/
-├── pages/                      # Page Objects - Clases que representan páginas web
-│   ├── BasePage.js            # Clase base con métodos comunes reutilizables
-│   ├── LoginPage.js           # Page Object específico para la página de login
-│   └── GooglePage.js          # Page Object para Google (ejemplo)
+├── frontend/                   # Tests de Frontend (E2E con Playwright)
+│   ├── pages/                 # Page Objects - Clases que representan páginas web
+│   │   ├── BasePage.js        # Clase base con métodos comunes reutilizables
+│   │   └── LoginPage.js       # Page Object específico para la página de login
+│   │
+│   ├── tests/                 # Tests de Playwright (.spec.js)
+│   │   └── login.spec.js      # Tests de login con 3 escenarios diferentes
+│   │
+│   └── README.md              # Documentación de tests frontend
 │
-├── tests/                      # Tests de Playwright (.spec.js)
-│   ├── login.spec.js          # Tests de login con 3 escenarios diferentes
-│   └── example.spec.js        # Test de ejemplo
+├── api/                        # Tests de APIs REST
+│   ├── tests/                 # Tests de APIs
+│   │   └── objects.spec.js    # Tests del endpoint /objects (GET, POST)
+│   │
+│   └── README.md              # Documentación de tests API
 │
-├── features/                   # Feature files de Cucumber (BDD)
-│   ├── support/               # Configuración de Cucumber
-│   │   └── hooks.js           # Setup/Teardown de browser (Before/After)
-│   ├── login.feature          # Feature file con escenarios de login
-│   └── example.feature        # Feature file de ejemplo
-│
-├── step-definitions/          # Implementación de steps de Cucumber
-│   ├── loginSteps.js          # Steps para los escenarios de login
-│   └── google.steps.js        # Steps para búsqueda en Google
-│
-├── reports/                   # Reportes generados
-│   ├── cucumber-report.html   # Reporte HTML de Cucumber
-│   └── cucumber-report.json   # Reporte JSON de Cucumber
-│
-├── playwright.config.js       # Configuración de Playwright Test
-├── cucumber.js                # Configuración de Cucumber
+├── playwright.config.js       # ⚙️ CONFIGURACIÓN CENTRALIZADA (Frontend + API)
 ├── package.json              # Dependencias del proyecto
 ├── .gitignore                # Archivos ignorados por Git
 └── README.md                 # Este archivo
 ```
 
+## ⚙️ Configuración Centralizada
+
+El proyecto utiliza una **única configuración** en `/playwright.config.js` que maneja:
+- **Proyectos de Frontend**: `frontend-chromium`, `frontend-firefox`, `frontend-webkit`
+- **Proyecto de API**: `api`
+
+Esto permite:
+- ✅ Mantener configuraciones compartidas en un solo lugar
+- ✅ Ejecutar todos los tests desde la raíz
+- ✅ Configuraciones específicas por tipo de test (navegadores vs API)
+- ✅ Mejor mantenibilidad y consistencia
+
 ## 🔧 Tecnologías Utilizadas
 
-- **Playwright** - Framework de automatización de navegadores
-- **Cucumber** - Framework BDD para escribir tests en lenguaje natural
+- **Playwright** - Framework de automatización de navegadores y APIs
 - **Node.js** - Runtime de JavaScript
 - **npm** - Gestor de paquetes
 
@@ -52,7 +59,7 @@ playwright-e2e/
 ```json
 {
   "@playwright/test": "^1.57.0",
-  "@cucumber/cucumber": "latest"
+  "@types/node": "^25.0.6"
 }
 ```
 
@@ -76,56 +83,65 @@ npm install
 ```bash
 # Verificar que Playwright está instalado correctamente
 npx playwright --version
-
-# Verificar que Cucumber está instalado correctamente
-npx cucumber-js --version
 ```
 
 ## 🧪 Ejecutar Tests
 
-### Ejecutar todos los tests de Playwright
+### ▶️ Todos los Tests (Frontend + API)
 
 ```bash
+# Ejecutar todos los tests (frontend en 3 navegadores + API)
 npm test
+# o
+npm run test:all
 ```
 
-O directamente:
+### 🌐 Tests de Frontend (E2E)
 
 ```bash
-npx playwright test
+# Ejecutar todos los tests de frontend (chromium, firefox, webkit)
+npm run test:frontend
+
+# Ejecutar en un navegador específico
+npx playwright test --project=frontend-chromium
+npx playwright test --project=frontend-firefox
+npx playwright test --project=frontend-webkit
 ```
 
-### Ejecutar tests específicos
+### 🔌 Tests de API
 
 ```bash
-# Ejecutar solo tests de login
-npx playwright test tests/login.spec.js
+# Ejecutar tests de API con reporte
+npm run test:api
+
+# Ejecutar solo los tests sin abrir el reporte
+npx playwright test --project=api
+```
+
+### 🎯 Ejecutar tests específicos
+
+```bash
+# Ejecutar solo tests de login (frontend)
+npx playwright test frontend/tests/login.spec.js
+
+# Ejecutar solo tests del endpoint objects (API)
+npx playwright test api/tests/objects.spec.js --project=api
 
 # Ejecutar test específico por nombre
 npx playwright test -g "Login correcto con usuario estándar"
+
+# Ejecutar múltiples proyectos
+npx playwright test --project=frontend-chromium --project=api
 ```
 
-### Ejecutar tests con Cucumber (BDD)
+### 🔧 Ejecutar tests en modo headless/headed (solo frontend)
 
 ```bash
-# Ejecutar todos los features de Cucumber
-npx cucumber-js
-
-# Ejecutar un feature específico
-npx cucumber-js features/login.feature
-
-# Ejecutar con tags específicos
-npx cucumber-js --tags "@smoke"
-```
-
-### Ejecutar tests en modo headless/headed
-
-```bash
-# Modo headless (sin interfaz gráfica)
-npx playwright test --headed=false
+# Modo headless (sin interfaz gráfica) - por defecto
+npx playwright test --project=frontend-chromium
 
 # Modo headed (ver el navegador)
-npx playwright test --headed
+npx playwright test --project=frontend-chromium --headed
 ```
 
 ## 📊 Reportes
