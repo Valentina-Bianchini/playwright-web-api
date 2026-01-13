@@ -1,4 +1,4 @@
-# Playwright Testing - Frontend E2E & API
+# Playwright Testing - E2E
 
 Proyecto de automatización de pruebas utilizando **Playwright** con arquitectura de **Page Object Model (POM)** para tests E2E y tests de API REST.
 
