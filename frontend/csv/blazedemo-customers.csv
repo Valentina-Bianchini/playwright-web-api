@@ -1,0 +1,6 @@
+name,address,city,state,zipCode,cardType,cardNumber,month,year,nameOnCard
+John Doe,123 Main Street,Boston,MA,02101,Visa,4111111111111111,12,2025,John Doe
+Jane Smith,456 Oak Avenue,New York,NY,10001,American Express,378282246310005,01,2026,Jane Smith
+Robert Johnson,789 Pine Street,Chicago,IL,60601,Diner's Club,30569309025904,03,2025,Robert Johnson
+Maria Garcia,321 Elm Drive,Los Angeles,CA,90210,Visa,4000000000000002,06,2024,Maria Garcia
+David Wilson,654 Cedar Lane,Miami,FL,33101,American Express,371449635398431,09,2026,David Wilson

@@ -1,7 +1,7 @@
 // Importar utilidades de Playwright Test y la clase LoginPage
 const { test, expect } = require('@playwright/test');
-const LoginPage = require('../pages/LoginPage');
-const { readCSV } = require('../utils/csvHelper');
+const LoginPage = require('../../pages/LoginPage');
+const { readCSV } = require('../../utils/csvHelper');
 const path = require('path');
 
 // Leer las credenciales desde el archivo CSV

@@ -9,13 +9,11 @@ class LoginPage extends BasePage {
     
     // URL base de la aplicación Swag Labs
     this.baseUrl = 'https://www.saucedemo.com/';
-    // Selector del campo de usuario
+    
+    // Selectores de los elementos de la página
     this.usernameInput = '#user-name';
-    // Selector del campo de contraseña
     this.passwordInput = '#password';
-    // Selector del botón de inicio de sesión
     this.loginButton = '#login-button';
-    // Selector del contenedor de inventario (productos) - aparece después del login exitoso
     this.inventoryContainer = '.inventory_container';
   }
 
@@ -24,12 +22,12 @@ class LoginPage extends BasePage {
     await super.navigate(this.baseUrl);
   }
 
-  // Ingresar el nombre de usuario en el campo correspondiente
+  // Ingresar el nombre de usuario
   async enterUsername(username) {
     await this.fill(this.usernameInput, username);
   }
 
-  // Ingresar la contraseña en el campo correspondiente
+  // Ingresar la contraseña
   async enterPassword(password) {
     await this.fill(this.passwordInput, password);
   }
@@ -41,9 +39,7 @@ class LoginPage extends BasePage {
 
   // Verificar que la página de productos se cargó correctamente
   async verifyProductsPageLoaded() {
-    // Esperar a que el contenedor de inventario esté presente
     await this.waitForSelector(this.inventoryContainer);
-    // Verificar que el contenedor es visible y retornar el resultado
     const isVisible = await this.isVisible(this.inventoryContainer);
     return isVisible;
   }
